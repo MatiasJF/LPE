@@ -117,3 +117,8 @@ print(a)
 # Intalar tidyverse -------------------------------------------------------------------------------
 
 install.packages("tidyverse")
+
+# Request servicio rest ---------------------------------------------------------------------------
+
+exp_22145824 <- jsonlite::fromJSON("https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/")
+print(exp_221458324)
