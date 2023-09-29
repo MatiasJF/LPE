@@ -116,4 +116,15 @@ print(a)
 
 # Intalar tidyverse -------------------------------------------------------------------------------
 
-install.packages("tidyverse")
+# install.packages (c("tidyverse", "dplyr", "janitor", "readr"))
+library("dplyr", "janitor", "readr")
+
+# Cargar datos ------------------------------------------------------------------------------------
+
+exp_22145824 <- jsonlite::fromJSON("https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/")
+df <- exp_22145824$ListaEESSPrecio # get readable table
+df <- df %>%  janitor::clean_names() %>% glimpse()
+clean_data <- df %>% readr::type_convert(locale = readr::locale(decimal_mark = ",")) %>% glimpse()
+
+
+
