@@ -116,8 +116,12 @@ print(a)
 
 # Intalar tidyverse -------------------------------------------------------------------------------
 
-# install.packages (c("tidyverse", "dplyr", "janitor", "readr"))
-library("dplyr", "janitor", "readr")
+# install.packages (c("tidyverse", "dplyr", "janitor", "readr", "writexl","openxlsx"))
+library("dplyr")
+library("janitor")
+library("readr")
+library("writexl")
+library("openxlsx")
 
 # Cargar datos ------------------------------------------------------------------------------------
 
@@ -127,4 +131,24 @@ df <- df %>%  janitor::clean_names() %>% glimpse()
 clean_data <- df %>% readr::type_convert(locale = readr::locale(decimal_mark = ",")) %>% glimpse()
 
 
+
+# Data Treating -----------------------------------------------------------
+
+villa <- clean_data %>% select(precio_gasoleo_a , rotulo , direccion, localidad) %>% 
+  filter(localidad == "VILLAVICIOSA DE ODON") %>% View()
+
+boavi <- clean_data %>% select(precio_gasoleo_a , rotulo , direccion, localidad) %>% 
+  filter(localidad == "VILLAVICIOSA DE ODON"|localidad == "BOADILLA DEL MONTE") %>% 
+  arrange(precio_gasoleo_a) %>% View()
+
+mad <- clean_data %>% select(precio_gasoleo_a , rotulo , direccion, localidad) %>% 
+  filter(grepl(" MADRID", localidad)) %>% arrange(precio_gasoleo_a) %>% View()
+
+mad <- clean_data %>% select(precio_gasoleo_a , rotulo , direccion, localidad) %>% 
+  filter(grepl(" MADRID", localidad)) %>% arrange(precio_gasoleo_a) %>% as.data.frame()
+
+# Storing Data ------------------------------------------------------------
+
+writexl::write_xlsx(mad, "informe_madrid.xlsx")
+openxlsx::write.xlsx(mad, "informe_madrid2.xlsx", rowNames = TRUE)
 
