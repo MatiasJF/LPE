@@ -116,12 +116,15 @@ print(a)
 
 # Intalar tidyverse -------------------------------------------------------------------------------
 
-# install.packages (c("tidyverse", "dplyr", "janitor", "readr", "writexl","openxlsx"))
+# install.packages (c("tidyverse", "dplyr", "janitor", "readr", "writexl","openxlsx","leaflet","htmlwidgets"))
+
+library("leaflet")
 library("dplyr")
 library("janitor")
 library("readr")
 library("writexl")
 library("openxlsx")
+library("htmlwidgets")
 
 # Cargar datos ------------------------------------------------------------------------------------
 
@@ -149,6 +152,32 @@ mad <- clean_data %>% select(precio_gasoleo_a , rotulo , direccion, localidad) %
 
 # Storing Data ------------------------------------------------------------
 
-writexl::write_xlsx(mad, "informe_madrid.xlsx")
-openxlsx::write.xlsx(mad, "informe_madrid2.xlsx", rowNames = TRUE)
+writexl::write_xlsx(mad, "informes/informe_madrid.xlsx")
+openxlsx::write.xlsx(mad, "informes/informe_madrid2.xlsx", rowNames = TRUE)
+
+INFORME_VILLA <- write.csv(villa, "informes/gaso_villa.csv")
+
+write_excel_csv(mad, "informes/Informe_madrid.xls")
+
+# MAPAS DE GASOLINERAS -------------------------------------------------------
+
+mapa_mad <- clean_data %>% select(rotulo, precio_gasoleo_a, direccion, municipio, provincia, latitud, longitud_wgs84) %>% 
+  filter(provincia=="MADRID", precio_gasoleo_a < 1.55, grepl("BALLENOIL", rotulo)) %>% arrange(desc(precio_gasoleo_a))
+
+mapa_mad %>% leaflet() %>% addTiles() %>% 
+  addCircleMarkers(lat = ~latitud, lng = ~longitud_wgs84, popup = ~rotulo, label = ~precio_gasoleo_a)
+
+
+# GASOLINERAS LOW COST ----------------------------------------------------
+
+media_gas <- clean_data %>% select(rotulo, precio_gasoleo_a, direccion, municipio, provincia, latitud, longitud_wgs84) %>% 
+  filter(provincia=="MADRID") %>% arrange(desc(precio_gasoleo_a))
+
+media_gas %>% group_by(rotulo) %>% summarise(media = mean(precio_gasoleo_a)) %>% 
+  arrange(media) %>% write_excel_csv(media_gas, "informes/gasolineras_low_cost.xls") %>% filter(media < 1.55) %>% View()
+
+media_gas %>% leaflet() %>% addTiles() %>% 
+  addCircleMarkers(lat = ~latitud, lng = ~longitud_wgs84, popup = ~rotulo, label = ~precio_gasoleo_a) %>%  
+  saveWidget("informes/low_cost/mapa_mad.html")
+
 
