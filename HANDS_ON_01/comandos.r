@@ -180,4 +180,15 @@ media_gas %>% leaflet() %>% addTiles() %>%
   addCircleMarkers(lat = ~latitud, lng = ~longitud_wgs84, popup = ~rotulo, label = ~precio_gasoleo_a) %>%  
   saveWidget("informes/low_cost/mapa_mad.html")
 
+# GASOLINERAS LOW COST ----------------------------------------------------
 
+media_gas <- clean_data %>% mutate(low_cost = !rotulo%in% c("REPSOL", "CEPSA", "Q8", "BP", "SHELL", "CAMPSA", "GALP"))
+
+
+# COL NUEVA GAS LOW COST --------------------------------------------------
+
+# generar uan columna nueva con un booleano depende de si la gasolinera es low cost o no
+
+media_gas <- clean_data %>% mutate(low_cost = !rotulo%in% c("REPSOL", "CEPSA", "Q8", "BP", "SHELL", "CAMPSA", "GALP")) %>% 
+  select(rotulo, precio_gasoleo_a, direccion, municipio, provincia, latitud, longitud_wgs84, low_cost) %>% 
+  filter(provincia=="MADRID") %>% arrange(desc(precio_gasoleo_a))
