@@ -173,6 +173,9 @@ mapa_mad %>% leaflet() %>% addTiles() %>%
 media_gas <- clean_data %>% select(rotulo, precio_gasoleo_a, direccion, municipio, provincia, latitud, longitud_wgs84) %>% 
   filter(provincia=="MADRID") %>% arrange(desc(precio_gasoleo_a))
 
+media_gas <- clean_data %>% select(rotulo, precio_gasoleo_a, direccion, municipio, provincia, latitud, longitud_wgs84) %>% 
+  arrange(desc(precio_gasoleo_a))
+
 media_gas %>% group_by(rotulo) %>% summarise(media = mean(precio_gasoleo_a)) %>% 
   arrange(media) %>% write_excel_csv(media_gas, "informes/gasolineras_low_cost.xls") %>% filter(media < 1.55) %>% View()
 
@@ -187,8 +190,17 @@ media_gas <- clean_data %>% mutate(low_cost = !rotulo%in% c("REPSOL", "CEPSA", "
 
 # COL NUEVA GAS LOW COST --------------------------------------------------
 
+# group by por gasolinera , calcular la media de los precios por gasolinera y ordenarlas descendeientemente
+
+media_gas <- clean_data %>% group_by(rotulo) %>% summarise(media = mean(precio_gasoleo_a)) %>% 
+  arrange(media) %>%  View()
+
 # generar uan columna nueva con un booleano depende de si la gasolinera es low cost o no
 
 media_gas <- clean_data %>% mutate(low_cost = !rotulo%in% c("REPSOL", "CEPSA", "Q8", "BP", "SHELL", "CAMPSA", "GALP")) %>% 
   select(rotulo, precio_gasoleo_a, direccion, municipio, provincia, latitud, longitud_wgs84, low_cost) %>% 
   filter(provincia=="MADRID") %>% arrange(desc(precio_gasoleo_a))
+
+
+
+
