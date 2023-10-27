@@ -116,15 +116,16 @@ print(a)
 
 # Intalar tidyverse -------------------------------------------------------------------------------
 
-# install.packages (c("tidyverse", "dplyr", "janitor", "readr", "writexl","openxlsx","leaflet","htmlwidgets"))
+# install.packages (c("tidyverse", "dplyr", "janitor", "readr", "writexl","penxlsx","leaflet","htmlwidgets", "readxl"))
 
-library("leaflet")
-library("dplyr")
-library("janitor")
-library("readr")
-library("writexl")
-library("openxlsx")
-library("htmlwidgets")
+library(leaflet)
+library(dplyr)
+library(janitor)
+library(readr)
+library(writexl)
+library(openxlsx)
+library(readxl)
+library(htmlwidgets)
 
 # Cargar datos ------------------------------------------------------------------------------------
 
@@ -190,16 +191,40 @@ media_gas <- clean_data %>% mutate(low_cost = !rotulo%in% c("REPSOL", "CEPSA", "
 
 # COL NUEVA GAS LOW COST --------------------------------------------------
 
-# group by por gasolinera , calcular la media de los precios por gasolinera y ordenarlas descendeientemente
-
 media_gas <- clean_data %>% group_by(rotulo) %>% summarise(media = mean(precio_gasoleo_a)) %>% 
-  arrange(media) %>%  View()
+  arrange(desc(media)) %>%  View()
 
-# generar uan columna nueva con un booleano depende de si la gasolinera es low cost o no
 
 media_gas <- clean_data %>% mutate(low_cost = !rotulo%in% c("REPSOL", "CEPSA", "Q8", "BP", "SHELL", "CAMPSA", "GALP")) %>% 
   select(rotulo, precio_gasoleo_a, direccion, municipio, provincia, latitud, longitud_wgs84, low_cost) %>% 
   filter(provincia=="MADRID") %>% arrange(desc(precio_gasoleo_a))
+
+
+# MEDIA ANDALUCIA ---------------------------------------------------------
+
+provincias_andalucia <- c("ALMERÍA", "CÁDIZ", "CÓRDOBA", "GRANADA", "HUELVA", "JAÉN", "MÁLAGA", "SEVILLA")
+
+# clean_data <- clean_data %>% mutate(comunidad = ifelse(provincia %in% provincias_andalucia, "ANDALUCÍA", ""))
+
+idcaa <- readxl::read_excel("HANDS_ON_01/codccaa_OFFCIAL.xls", skip = 1) %>% glimpse()
+
+clean_data <- merge(clean_data, idcaa, by.x = "idccaa", by.y = "CODIGO", all.x = TRUE)
+
+colnames(clean_data)[colnames(clean_data) == "LITERAL"] <- "comunidad"
+
+media_andalucia <- clean_data %>% select(rotulo, comunidad,  precio_gasoleo_a, direccion, municipio, provincia, latitud, longitud_wgs84) %>% 
+  filter(comunidad == "Andalucía") %>% arrange(desc(precio_gasoleo_a)) %>% glimpse()
+
+precio_andalucia <- mean(media_andalucia$precio_gasoleo_a, na.rm = TRUE) %>% glimpse()
+
+media_andalucia %>% group_by(rotulo) %>% summarise(media = mean(precio_gasoleo_a)) %>% 
+  arrange(media) %>% write_excel_csv(media_andalucia, "informes/media_andalucia.xls") %>% View()
+
+media_andalucia %>% leaflet() %>% addTiles() %>% 
+  addCircleMarkers(lat = ~latitud, lng = ~longitud_wgs84, popup = ~rotulo, label = ~precio_gasoleo_a) %>% 
+  saveWidget("informes/andalucia/mapa_andalucia.html")
+ 
+
 
 
 
