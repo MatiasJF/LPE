@@ -202,10 +202,6 @@ media_gas <- clean_data %>% mutate(low_cost = !rotulo%in% c("REPSOL", "CEPSA", "
 
 # MEDIA ANDALUCIA ---------------------------------------------------------
 
-provincias_andalucia <- c("ALMERÍA", "CÁDIZ", "CÓRDOBA", "GRANADA", "HUELVA", "JAÉN", "MÁLAGA", "SEVILLA")
-
-# clean_data <- clean_data %>% mutate(comunidad = ifelse(provincia %in% provincias_andalucia, "ANDALUCÍA", ""))
-
 idcaa <- readxl::read_excel("HANDS_ON_01/codccaa_OFFCIAL.xls", skip = 1) %>% glimpse()
 
 clean_data <- merge(clean_data, idcaa, by.x = "idccaa", by.y = "CODIGO", all.x = TRUE)
@@ -224,7 +220,25 @@ media_andalucia %>% leaflet() %>% addTiles() %>%
   addCircleMarkers(lat = ~latitud, lng = ~longitud_wgs84, popup = ~rotulo, label = ~precio_gasoleo_a) %>% 
   saveWidget("informes/andalucia/mapa_andalucia.html")
  
+# Get population data (municipios de INE) --------------------------
 
+carpeta_informes <- "informes/pobmun"
+
+data_clean <- clean_data
+
+datos_municipio <- readxl::read_excel("informes/pobmun/pobmun22.xlsx", skip = 1)
+  
+datos_municipio <- datos_municipio %>% select(-1:-4,"CMUN"= 3,  "Poblacion" = 5, "Pob_M" = 6, "Pob_F" =7)
+  
+datos_municipio$CMUN <- as.integer(datos_municipio$CMUN)
+  
+data_clean$id_provincia <- as.integer(data_clean$id_provincia)
+  
+colnames(datos_municipio)[colnames(datos_municipio) == "CMUN"] <- "id_provincia"
+  
+data_clean <- merge(data_clean, datos_municipio, by.x = "id_provincia", by.y = "id_provincia", all.x = TRUE)
+
+data_clean %>% View()
 
 
 
