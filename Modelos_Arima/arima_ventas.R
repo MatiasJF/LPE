@@ -8,12 +8,16 @@ data("AirPassengers")
 # convertir a serie temporal
 pasajeros <- ts(AirPassengers, frequency = 12)
 
+train_len <- floor(length(pasajeros) * 0.8)
+train <- pasajeros[1:train_len]
+test <- pasajeros[(train_len + 1):length(pasajeros)]
+
 # Análisis exploratorio y grafica de la seria
-summary1 <- summary(pasajeros)
+summary1 <- summary(train)
 plot(pasajeros, main = "Pasajeros Aéreos Mensuales", xlab = "Mes", ylab = "Pasajeros")
 
 # Meter la serie en un modelo arima
-modelo_pasajeros <- auto.arima(pasajeros)
+modelo_pasajeros <- auto.arima(train)
 
 # Resumen del modelo
 summary2 <- summary(modelo_pasajeros)
@@ -29,3 +33,6 @@ plot(predicciones, main = "PrediccionPasajeros Aéreos Mensuales", xlab = "Mes",
 
 # Plot de los resultados de el modelo
 plot(modelo_pasajeros, main = "Modelo")
+
+acc <- accuracy(predicciones$mean, datos_prueba)
+
